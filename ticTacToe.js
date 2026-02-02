@@ -1,9 +1,13 @@
 //tic-tac toe Game logic
-//gameboard module
+// Gameboard module
+// Responsible for storing and updating the game state
+// Uses an IIFE to ensure only one board exists
 const Gameboard = (() => {
   let board = ["", "", "", "", "", "", "", "", ""]; //board represented as an array
 
+  //returns the current state of the board
   const getBoard = () => board;
+  
   //place a mark ('X' or 'O') at a given index
   const placeMark = (index, mark) => {
     if (board[index] !== "") return false;
@@ -19,23 +23,27 @@ const Gameboard = (() => {
 })();
 
 //player factory function
+//creates player objects with name and mark properties
 const Player = (name, mark) => {
   return { name, mark };
 };
 
-//game controller module
+//Game controller module
+//Manages game flow, player turns, win/tie conditions
 const GameController = (() => {
   let player1;
   let player2;
   let currentPlayer;
   let gameOver = false;
 
+  //all possible winning combinations
   const winningCombinations = [
     [0, 1, 2],[3, 4, 5],[6, 7, 8],
     [0, 3, 6],[1, 4, 7],[2, 5, 8],
     [0, 4, 8],[2, 4, 6],
   ];
 
+  //starts or restarts new game
   const startGame = (name1 = "Player 1", name2 = "Player 2") => {
     player1 = Player(name1, "X");
     player2 = Player(name2, "O");
@@ -47,6 +55,7 @@ const GameController = (() => {
   const getCurrentPlayer = () => currentPlayer;
   const isGameOver = () => gameOver;
 
+//check if current player has won
   const checkWin = () => {
     const board = Gameboard.getBoard();
     return winningCombinations.some(combo =>
@@ -54,15 +63,18 @@ const GameController = (() => {
     );
   };
 
+  //check for tie
   const checkTie = () => {
     return Gameboard.getBoard().every(cell => cell !== "");
   };
 
+  //switch turns between players
   const switchPlayer = () => {
     currentPlayer = 
         currentPlayer === player1 ? player2 : player1;
   };
 
+  //handles a player's move
   const playRound = (index) => {
     if (gameOver) return "game Over!"
 
@@ -112,14 +124,17 @@ const GameController = (() => {
 // GameController.playRound(6); // Player 1 wins
 // GameController.restart();
 
-//display controller module
+//DisplayController module
+//handles  all DOM UI updates and user interactions
 const DisplayController = (() => {
   const boardElement = document.getElementById("gameboard");
   const statusText = document.getElementById("status");
   const startBtn = document.getElementById("startbtn");
+
   const p1Input = document.getElementById("player1");
   const p2Input = document.getElementById("player2");
 
+  //renders the Gameboard based on current state
   const renderBoard = () => {
     boardElement.innerHTML = "";
 
@@ -129,6 +144,7 @@ const DisplayController = (() => {
       square.textContent = mark;
       //square.dataset.index = index;
 
+      //add click event to each square
       square.addEventListener("click", () => {
         const message = GameController.playRound(index);
         renderBoard();
@@ -147,6 +163,7 @@ const DisplayController = (() => {
         }
     };
 
+    //start/restart game on button click
     startBtn.addEventListener("click", () => {
         GameController.startGame(
             p1Input.value,
